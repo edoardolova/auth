@@ -4,7 +4,7 @@ function profileController(req, res){
     const userId = req.session.user_id;
 
     const sql = `
-        SELECT id, username,name, surname, birth_year, role
+        SELECT id, username,name, surname, email,  birth_year, role
         FROM users
         WHERE id = ?
     `;

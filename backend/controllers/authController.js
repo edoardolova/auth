@@ -2,7 +2,8 @@ const connection = require("../db/db.js")
 const bcrypt = require('bcrypt');
 const crypto = require('crypto')
 
-async function register(req, res) {
+async function signUp(req, res) {
+    console.log(req.body)
 
     const {
         username,
@@ -99,7 +100,8 @@ async function register(req, res) {
 
 
 function login(req, res){
-    const {username, password} = req.body;
+
+    const { username, password } = req.body;
 
     if (!username || !password) {
         return res.status(400).json({
@@ -112,10 +114,10 @@ function login(req, res){
         SELECT id, password_hash, role, is_active
         FROM users
         WHERE username = ?
-    `
-
+    `;
 
     connection.query(checkUsernameSql, [username], async (err, result)=>{
+
         if (err) {
             return res.status(500).json({ error: true, mess: err.message });
         }
@@ -126,17 +128,64 @@ function login(req, res){
                 mess: 'username non trovato'
             });
         }
+
         const user = result[0];
 
         const pswMatch = await bcrypt.compare(password, user.password_hash);
-        if (pswMatch) {
+
+        if (!pswMatch) {
+            return res.status(400).json({
+                error: true,
+                mess: 'password errata'
+            });
+        }
+
+        // check existing session
+        const checkSessionSql = `
+            SELECT token, expires_at
+            FROM sessions
+            WHERE user_id = ?
+            AND is_valid = 1
+            AND expires_at > NOW()
+            LIMIT 1
+        `;
+
+        connection.query(checkSessionSql, [user.id], (err, sessionResult)=>{
+
+            if (err) {
+                return res.status(500).json({
+                    error: true,
+                    mess: err.message
+                });
+            }
+
+            // session already exist stop login
+            if (sessionResult.length > 0) {
+
+                return res.status(409).json({
+                    error: true,
+                    mess: 'utente già loggato',
+                    token: sessionResult[0].token
+                });
+
+            }
+
+            // create new session
             const token = crypto.randomUUID();
+
             const createSessionSql = `
-                INSERT INTO sessions (user_id, token, created_at, expires_at)
-                VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 10 MINUTE))
+                INSERT INTO sessions (
+                    user_id,
+                    token,
+                    created_at,
+                    expires_at,
+                    is_valid
+                )
+                VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 10 MINUTE), 1)
             `;
 
             connection.query(createSessionSql, [user.id, token], (err)=>{
+
                 if (err) {
                     return res.status(500).json({
                         error: true,
@@ -148,17 +197,12 @@ function login(req, res){
                     message: "Login effettuato",
                     token: token
                 });
-            })
-        }
-        else{
-            return res.status(400).json({
-                error: true,
-                mess: 'password errata'
+
             });
-        }
 
-    })
+        });
 
+    });
 
 }
 
@@ -208,4 +252,4 @@ function logout(req, res) {
 
 
 
-module.exports ={register, login, logout}
+module.exports ={signUp, login, logout}

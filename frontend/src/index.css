@@ -1,0 +1,8 @@
+@import "bootstrap";
+
+#root{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(#134e5e,#71b280);
+}
