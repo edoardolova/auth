@@ -77,7 +77,7 @@ Lo schema del DB si trova nella cartella schemaSql, basterà importarlo in MySQL
 
 ### SignUp
 
-'http://localhost:5500/auth/signUp' (metodo POST)
+`http://localhost:5500/auth/signUp` (metodo POST)
 es. body della richesta:
 
 ```sh
@@ -93,7 +93,7 @@ es. body della richesta:
 
 ### Login
 
-'http://localhost:5500/auth/login' (metodo POST)
+`http://localhost:5500/auth/login` (metodo POST)
 es. body della richesta:
 
 ```sh
@@ -105,14 +105,14 @@ es. body della richesta:
 
 ### Logout
 
-'http://localhost:5500/auth/logout' (metodo POST)
+`http://localhost:5500/auth/logout` (metodo POST)
 es. header della rischiesta:
 Key: Authorization
 Value: 562ec7a6-3ae4-4cab-96e5-d8dcab4c2963 (Token generato dal backend)
 
 ### Profilo
 
-'http://localhost:5500/profile '(metodo GET)
+`http://localhost:5500/profile` (metodo GET)
 es. header della rischiesta:
 Key: Authorization
 Value: 562ec7a6-3ae4-4cab-96e5-d8dcab4c2963 (Token generato dal backend)
